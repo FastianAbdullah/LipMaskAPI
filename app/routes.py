@@ -13,7 +13,7 @@ from PIL import Image, UnidentifiedImageError
 
 from .auth import require_api_key
 from .config import get_settings
-from .core.model import _model
+from .core import model as _model_module
 from .core.pipeline import render_overlay, run_inference
 from .schemas import HealthResponse, SegmentResponse
 
@@ -39,7 +39,7 @@ def _png_b64(rgb_or_gray: np.ndarray) -> str:
 async def health() -> HealthResponse:
     return HealthResponse(
         status="ok",
-        model_loaded=_model is not None,
+        model_loaded=_model_module._model is not None,
         version=__version__,
     )
 
