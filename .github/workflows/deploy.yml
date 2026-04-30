@@ -1,0 +1,36 @@
+name: Deploy to production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -euo pipefail
+            APP_DIR="/var/www/apps/lip-seg-api"
+
+            echo "── Pulling latest code ──"
+            cd "${APP_DIR}"
+            git pull origin main
+
+            echo "── Updating dependencies ──"
+            .venv/bin/pip install -q --upgrade pip wheel
+            .venv/bin/pip install -q -r requirements.txt \
+              --extra-index-url https://download.pytorch.org/whl/cpu
+
+            echo "── Restarting service ──"
+            systemctl restart lip-seg-api.service
+            systemctl --no-pager status lip-seg-api.service | head -n 8
+
+            echo "── Health check ──"
+            sleep 3
+            curl -sf http://127.0.0.1:8003/health | python3 -m json.tool

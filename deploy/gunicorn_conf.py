@@ -8,7 +8,7 @@ into its own RAM (~50-100 MB for MobileDeepLabV3 + dependencies).
 import multiprocessing
 import os
 
-bind = f"{os.environ.get('HOST', '127.0.0.1')}:{os.environ.get('PORT', '8000')}"
+bind = f"{os.environ.get('HOST', '127.0.0.1')}:{os.environ.get('PORT', '8003')}"
 workers = int(os.environ.get("WEB_CONCURRENCY", max(1, multiprocessing.cpu_count() - 1)))
 worker_class = "uvicorn.workers.UvicornWorker"
 

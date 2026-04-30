@@ -7,9 +7,9 @@ Wants=network-online.target
 Type=simple
 User=lipseg
 Group=lipseg
-WorkingDirectory=/opt/lip-seg-api
-EnvironmentFile=/opt/lip-seg-api/.env
-ExecStart=/opt/lip-seg-api/.venv/bin/gunicorn \
+WorkingDirectory=/var/www/apps/lip-seg-api
+EnvironmentFile=/var/www/apps/lip-seg-api/.env
+ExecStart=/var/www/apps/lip-seg-api/.venv/bin/gunicorn \
     --config deploy/gunicorn_conf.py \
     app.main:app
 

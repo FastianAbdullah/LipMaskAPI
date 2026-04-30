@@ -12,9 +12,9 @@ set -euo pipefail
 
 # ─── CONFIG ─────────────────────────────────────────────────────────────────
 APP_USER="lipseg"
-APP_DIR="/opt/lip-seg-api"
+APP_DIR="/var/www/apps/lip-seg-api"
 PYTHON_BIN="python3.11"     # adjust if your VPS has a different version
-DOMAIN=""                   # e.g. "api.example.com" — leave empty to skip nginx/TLS
+DOMAIN="lip.qubiloo.cloud"  # subdomain for this API
 # ────────────────────────────────────────────────────────────────────────────
 
 if [[ $EUID -ne 0 ]]; then
