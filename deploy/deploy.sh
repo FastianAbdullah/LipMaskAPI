@@ -14,7 +14,7 @@ set -euo pipefail
 APP_USER="lipseg"
 APP_DIR="/var/www/apps/lip-seg-api"
 PYTHON_BIN="python3.12"
-DOMAIN="lip.qubiloo.cloud"  # subdomain for this API
+DOMAIN=""                   # set to your domain to enable TLS via certbot
 # ────────────────────────────────────────────────────────────────────────────
 
 if [[ $EUID -ne 0 ]]; then
@@ -77,17 +77,16 @@ systemctl enable lip-seg-api.service
 systemctl restart lip-seg-api.service
 
 echo "[7/8] Configuring nginx..."
+cp "${APP_DIR}/deploy/nginx.conf" /etc/nginx/sites-available/lip-seg-api
+ln -sf /etc/nginx/sites-available/lip-seg-api /etc/nginx/sites-enabled/lip-seg-api
+rm -f /etc/nginx/sites-enabled/default
+nginx -t
+systemctl reload nginx
 if [[ -n "${DOMAIN}" ]]; then
-    sed "s|<YOUR_DOMAIN>|${DOMAIN}|g" "${APP_DIR}/deploy/nginx.conf" \
-        > /etc/nginx/sites-available/lip-seg-api
-    ln -sf /etc/nginx/sites-available/lip-seg-api /etc/nginx/sites-enabled/lip-seg-api
-    rm -f /etc/nginx/sites-enabled/default
-    nginx -t
-    systemctl reload nginx
     echo "  Nginx configured for ${DOMAIN}."
     echo "  Run:  sudo certbot --nginx -d ${DOMAIN}   to issue TLS certs."
 else
-    echo "  DOMAIN not set — skipping nginx step. App listens on 127.0.0.1:8000."
+    echo "  Nginx configured. API accessible at http://$(curl -s ifconfig.me)/"
 fi
 
 echo "[8/8] Status:"
