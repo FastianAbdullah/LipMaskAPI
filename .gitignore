@@ -4,8 +4,7 @@
 !.env.example
 
 # Model weights — keep on server only
-models/*.pth
-models/*.task
+
 models/*.onnx
 !models/.gitkeep
 
