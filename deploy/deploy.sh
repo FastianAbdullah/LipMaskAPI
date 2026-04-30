@@ -13,7 +13,7 @@ set -euo pipefail
 # ─── CONFIG ─────────────────────────────────────────────────────────────────
 APP_USER="lipseg"
 APP_DIR="/var/www/apps/lip-seg-api"
-PYTHON_BIN="python3.11"     # adjust if your VPS has a different version
+PYTHON_BIN="python3.12"
 DOMAIN="lip.qubiloo.cloud"  # subdomain for this API
 # ────────────────────────────────────────────────────────────────────────────
 
