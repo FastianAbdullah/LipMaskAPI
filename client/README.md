@@ -1,71 +1,49 @@
 # Lip Segmentation Client
 
-A small Python script that calls the lip segmentation service and saves the results locally. No model files, no GPU, no setup beyond `pip install requests`.
+Send a photo to the lip segmentation API and get back masks, contours, and an overlay — no GPU, no model files needed.
 
-## Setup
+## Install
 
 ```bash
 pip install requests
 ```
 
-That's the only dependency.
-
-## Configuration
-
-Set your API endpoint and key (you'll receive these separately):
+## Quick start
 
 ```bash
-export LIP_SEG_API_URL="https://api.example.com"
-export LIP_SEG_API_KEY="your_key_here"
+python client.py --image photo.jpg --url http://72.61.75.134 --api-key YOUR_KEY
 ```
 
-(Windows PowerShell)
+Results are saved to `lip_seg_results/<image-name>/`.
 
-```powershell
-$Env:LIP_SEG_API_URL = "https://api.example.com"
-$Env:LIP_SEG_API_KEY = "your_key_here"
-```
+## Options
 
-## Usage
+| Flag | Description |
+|---|---|
+| `--image` | Path to a single image |
+| `--image-dir` | Path to a folder of images |
+| `--output` | Where to save results (default: `./lip_seg_results`) |
+| `--url` | API base URL |
+| `--api-key` | Your API key |
 
-**Single image:**
+## Output files
 
-```bash
-python client.py --image photo.jpg
-```
+Each image gets its own folder:
 
-**Whole folder:**
+| File | What it is |
+|---|---|
+| `input.png` | Copy of your original photo |
+| `upper_lip_mask.png` | Upper lip binary mask |
+| `lower_lip_mask.png` | Lower lip binary mask |
+| `overlay.png` | Lips outlined on the original photo |
+| `contour_coords.json` | Lip polygon coordinates |
+| `response.json` | Timing and metadata |
 
-```bash
-python client.py --image-dir ./test_photos --output ./results
-```
+## Errors
 
-**Override the URL / key on the command line:**
-
-```bash
-python client.py --image photo.jpg --url https://api.example.com --api-key xxx
-```
-
-## Output
-
-For every input image, you get a folder with:
-
-| File                  | What it is                                              |
-| --------------------- | ------------------------------------------------------- |
-| `input.png`           | Copy of the original photo                              |
-| `upper_lip_mask.png`  | Binary mask of the upper lip, original image resolution |
-| `lower_lip_mask.png`  | Binary mask of the lower lip, original image resolution |
-| `overlay.png`         | Filled mask + contours drawn on the original photo      |
-| `contour_coords.json` | Polygon coordinates for both lips                       |
-| `response.json`       | Server timing + warnings metadata                       |
-
-## Troubleshooting
-
-- **401 Unauthorized** — check your `LIP_SEG_API_KEY`.
-- **422 Unprocessable Entity** — no face detected. Use a clearer photo where the lips are visible.
-- **413 Request Entity Too Large** — image bigger than the server limit (10 MB / 4096 px). Resize before sending.
-- **504 Gateway Timeout** — server was busy. Retry.
-
-## Performance
-
-Each request typically takes 200–800 ms on a CPU server, plus your network latency. Run a folder of 50 images sequentially in roughly half a minute on a decent connection.
+| Code | Cause | Fix |
+|---|---|---|
+| 401 | Wrong API key | Check your `--api-key` |
+| 422 | No face detected | Use a clearer photo with visible lips |
+| 413 | Image too large | Keep under 10 MB and 4096 px |
+| 504 | Server timeout | Retry |
