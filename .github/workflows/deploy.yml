@@ -13,7 +13,8 @@ jobs:
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 2222
           script: |
             set -euo pipefail
             APP_DIR="/var/www/apps/lip-seg-api"
