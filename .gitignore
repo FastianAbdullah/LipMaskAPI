@@ -1,0 +1,26 @@
+# Secrets — NEVER commit
+.env
+.env.*
+!.env.example
+
+# Model weights — keep on server only
+models/*.pth
+models/*.task
+models/*.onnx
+!models/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# Local
+*.log
+*.zip
+lip_seg_results/
+.DS_Store
+.idea/
+.vscode/

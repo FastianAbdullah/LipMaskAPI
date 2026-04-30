@@ -1,0 +1,40 @@
+[Unit]
+Description=Lip Segmentation API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=lipseg
+Group=lipseg
+WorkingDirectory=/opt/lip-seg-api
+EnvironmentFile=/opt/lip-seg-api/.env
+ExecStart=/opt/lip-seg-api/.venv/bin/gunicorn \
+    --config deploy/gunicorn_conf.py \
+    app.main:app
+
+# Lifecycle
+Restart=on-failure
+RestartSec=5
+KillMode=mixed
+TimeoutStopSec=30
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+LockPersonality=true
+RestrictRealtime=true
+
+# Limits
+LimitNOFILE=4096
+MemoryMax=2G
+
+[Install]
+WantedBy=multi-user.target

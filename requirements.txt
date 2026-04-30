@@ -1,0 +1,23 @@
+# Pinned for production. CPU-only PyTorch — install with:
+#   pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
+
+# ── Web framework ──
+fastapi==0.115.0
+requests==2.32.3  # client/client.py (same venv as local dev)
+uvicorn[standard]==0.32.0
+gunicorn==23.0.0
+python-multipart==0.0.12
+pydantic==2.9.2
+pydantic-settings==2.5.2
+
+# ── ML inference ──
+torch>=2.2,<2.6
+torchvision>=0.17,<0.21
+
+# ── Vision / image / face ──
+opencv-python-headless==4.10.0.84
+Pillow==10.4.0
+mediapipe==0.10.18
+scikit-image==0.24.0
+scipy==1.14.1
+numpy==1.26.4
