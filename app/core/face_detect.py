@@ -54,7 +54,7 @@ class LipROIDetector:
         pad_frac: float = 0.05,
     ) -> Optional[Tuple[np.ndarray, BBox]]:
         """
-        Returns (roi_crop, bbox) or None if no face was found.
+        Returns (roi_crop, bbox) or complete image if no face was found.
         bbox is (x1, y1, x2, y2) in original-image coordinates.
         """
         h, w = rgb_img.shape[:2]
@@ -62,7 +62,7 @@ class LipROIDetector:
         result = self._detector.detect(mp_image)
 
         if not result.face_landmarks:
-            return None
+            return rgb_img, (0, 0, w, h)
 
         lm = result.face_landmarks[0]
         xs = [int(lm[i].x * w) for i in LIP_LANDMARK_IDX]

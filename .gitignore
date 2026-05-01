@@ -23,3 +23,5 @@ lip_seg_results/
 .DS_Store
 .idea/
 .vscode/
+client/images/
+client/results/
