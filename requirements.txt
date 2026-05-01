@@ -11,13 +11,13 @@ pydantic==2.9.2
 pydantic-settings==2.5.2
 
 # ── ML inference ──
-torch>=2.2,<2.6
-torchvision>=0.17,<0.21
+torch>=2.2
+torchvision>=0.17
 
 # ── Vision / image / face ──
 opencv-python-headless==4.10.0.84
 Pillow==10.4.0
-mediapipe==0.10.18
+mediapipe==0.10.31
 scikit-image==0.24.0
 scipy==1.14.1
 numpy==1.26.4

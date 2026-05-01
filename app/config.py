@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     torch_num_threads: int = 2
 
     # ── Inference limits ──────────────────────────────────────────────────
-    max_image_bytes: int = 10 * 1024 * 1024        # 10 MB
+    max_image_bytes: int = 50 * 1024 * 1024        # 50 MB
     max_image_dim: int = 4096                       # px (longer side)
     allowed_mime_types: List[str] = [
         "image/jpeg", "image/png", "image/webp", "image/bmp",

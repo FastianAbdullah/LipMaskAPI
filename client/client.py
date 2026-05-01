@@ -29,7 +29,9 @@ import time
 from pathlib import Path
 
 import requests
+import io
 from dotenv import load_dotenv
+from PIL import Image as PILImage, ImageOps
 
 load_dotenv()
 
@@ -43,6 +45,23 @@ def _save_b64_png(b64: str, dest: Path) -> None:
     dest.write_bytes(base64.b64decode(b64))
 
 
+# Resize Image before sending to Network for Optimization.
+def _prepare_image(image_path: Path, max_dim: int = 1500) -> tuple[bytes, str]:
+    with PILImage.open(image_path) as im:
+        im = ImageOps.exif_transpose(im)
+        # Convert RGBA/P/LA etc. to RGB before JPEG encoding
+        if im.mode != "RGB":
+            im = im.convert("RGB")
+        
+        w, h = im.size
+        if max(w, h) > max_dim:
+            scale = max_dim / max(w, h)
+            im = im.resize((int(w * scale), int(h * scale)), PILImage.LANCZOS)
+        
+        buf = io.BytesIO()
+        im.save(buf, format="JPEG", quality=90)
+        return buf.getvalue(), "image/jpeg"
+
 def segment_image(image_path: Path, api_url: str, api_key: str,
                   out_root: Path, timeout: int = 60) -> bool:
     out_dir = out_root / image_path.stem
@@ -52,13 +71,12 @@ def segment_image(image_path: Path, api_url: str, api_key: str,
     t0 = time.perf_counter()
 
     try:
-        with image_path.open("rb") as fh:
-            files = {"file": (image_path.name, fh, _guess_mime(image_path))}
-            headers = {"X-API-Key": api_key}
-            r = requests.post(
-                f"{api_url.rstrip('/')}/v1/segment",
-                files=files, headers=headers, timeout=timeout,
-            )
+        img_bytes, mime = _prepare_image(image_path)  # ← resize here
+        
+        files = {"file": (image_path.name, img_bytes, mime)}  # ← send bytes, not file handle
+        headers = {"X-API-Key": api_key}
+        r = requests.post(f"{api_url.rstrip('/')}/v1/segment",
+                        files=files, headers=headers, timeout=timeout)
     except requests.RequestException as e:
         print(f"[network error] {e}")
         return False
