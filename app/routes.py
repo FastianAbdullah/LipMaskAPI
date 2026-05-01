@@ -79,7 +79,24 @@ async def segment(file: UploadFile = File(...)) -> SegmentResponse:
             im.load()
             if im.mode != "RGB":
                 im = im.convert("RGB")
+
+            if max(im.size) > settings.max_image_dim:
+                raise HTTPException(
+                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                    detail=f"Image dimension exceeds {settings.max_image_dim}px",
+                )
+
+            # Downscale before converting to ndarray to keep peak RAM bounded.
+            # The ROI gets resized to 256x256 anyway — anything past ~1600px
+            # only inflates intermediate buffers without improving accuracy.
+            longest = max(im.size)
+            if longest > settings.process_image_dim:
+                scale = settings.process_image_dim / longest
+                new_size = (int(im.size[0] * scale), int(im.size[1] * scale))
+                im = im.resize(new_size, Image.LANCZOS)
             rgb = np.array(im)
+    except HTTPException:
+        raise
     except (UnidentifiedImageError, OSError) as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -87,11 +104,6 @@ async def segment(file: UploadFile = File(...)) -> SegmentResponse:
         )
 
     h, w = rgb.shape[:2]
-    if max(h, w) > settings.max_image_dim:
-        raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"Image dimension exceeds {settings.max_image_dim}px",
-        )
 
     # ── Run inference in a thread (don't block the event loop) ─────────
     try:
