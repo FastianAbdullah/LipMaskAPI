@@ -30,11 +30,15 @@ import time
 from pathlib import Path
 
 import requests
+from dotenv import load_dotenv
 
-DEFAULT_URL = os.environ.get("LIP_SEG_API_URL", "http://127.0.0.1:8000")
-DEFAULT_KEY = os.environ.get("LIP_SEG_API_KEY", "")
+load_dotenv()
+
+DEFAULT_URL = os.environ.get("LIP_SEG_API_URL")
+DEFAULT_KEY = os.environ.get("LIP_SEG_API_KEY")
 ALLOWED_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
 
+print(f"Using API URL: {DEFAULT_URL}, API KEY: {DEFAULT_KEY}")
 
 def _save_b64_png(b64: str, dest: Path) -> None:
     dest.write_bytes(base64.b64decode(b64))
