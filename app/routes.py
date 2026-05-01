@@ -9,7 +9,7 @@ import logging
 import cv2
 import numpy as np
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, UnidentifiedImageError, ImageOps
 
 from .auth import require_api_key
 from .config import get_settings
@@ -76,6 +76,7 @@ async def segment(file: UploadFile = File(...)) -> SegmentResponse:
     # ── Decode → RGB ndarray (Pillow is more forgiving than cv2) ────────
     try:
         with Image.open(io.BytesIO(raw)) as im:
+            im = ImageOps.exif_transpose(im)
             im.load()
             if im.mode != "RGB":
                 im = im.convert("RGB")
