@@ -13,11 +13,8 @@ pip install requests python-dotenv
 Edit `.env` in this directory with your credentials:
 
 ```
-LIP_SEG_API_URL=http://72.61.75.134
-LIP_SEG_API_KEY=your_api_key_here
+LIP_SEG_API_KEY=your_api_key
 ```
-
-These are loaded automatically — no need to pass `--url` or `--api-key` on every run.
 
 ## Quick start
 
@@ -25,14 +22,11 @@ These are loaded automatically — no need to pass `--url` or `--api-key` on eve
 # Single image (credentials from .env)
 python client.py --image photo.jpg
 
-# Single image (explicit)
-python client.py --image photo.jpg --url http://72.61.75.134 --api-key YOUR_KEY
-
 # Batch — entire folder
 python client.py --image-dir ./photos --output ./results
 ```
 
-Results are saved to `lip_seg_results/<image-name>/` by default.
+Results are saved to `lip_seg_results/<image-nam e>/` by default.
 
 ## Options
 
@@ -41,8 +35,6 @@ Results are saved to `lip_seg_results/<image-name>/` by default.
 | `--image` | — | Path to a single image |
 | `--image-dir` | — | Path to a folder of images |
 | `--output` | `./lip_seg_results` | Where to save results |
-| `--url` | `$LIP_SEG_API_URL` | API base URL |
-| `--api-key` | `$LIP_SEG_API_KEY` | Your API key |
 | `--timeout` | `60` | Per-request timeout in seconds |
 
 ## Output files
@@ -62,7 +54,7 @@ Each image gets its own subfolder inside `<output>/`:
 
 | Code | Cause | Fix |
 |---|---|---|
-| 401 | Wrong API key | Check `LIP_SEG_API_KEY` in `.env` or pass `--api-key` |
+| 401 | Wrong API key | Check `LIP_SEG_API_KEY` in `.env`|
 | 422 | No face / lips detected | Use a clearer photo with visible lips |
 | 413 | Image too large | Keep under 10 MB and 4096 px |
 | 504 | Server timeout | Retry, or increase `--timeout` |

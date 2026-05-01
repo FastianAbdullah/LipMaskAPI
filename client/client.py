@@ -8,7 +8,6 @@ Usage:
     python client.py --image-dir ./test_photos --output ./results
 
 Environment:
-    LIP_SEG_API_URL    e.g. https://api.your-domain.com
     LIP_SEG_API_KEY    your API key
 
 Outputs (per image, written into <output>/<image_stem>/):
@@ -34,7 +33,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DEFAULT_URL = os.environ.get("LIP_SEG_API_URL")
+DEFAULT_URL = "http://72.61.75.134"
 DEFAULT_KEY = os.environ.get("LIP_SEG_API_KEY")
 ALLOWED_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
 
@@ -118,12 +117,11 @@ def main() -> int:
     ap.add_argument("--output", type=Path, default=Path("./lip_seg_results"),
                     help="Output directory (default: ./lip_seg_results)")
     ap.add_argument("--url", default=DEFAULT_URL, help="API base URL")
-    ap.add_argument("--api-key", default=DEFAULT_KEY, help="API key")
     ap.add_argument("--timeout", type=int, default=60, help="Per-request timeout (s)")
     args = ap.parse_args()
 
-    if not args.api_key:
-        print("ERROR: API key required. Set LIP_SEG_API_KEY env var or pass --api-key",
+    if not DEFAULT_KEY:
+        print("ERROR: API key required. Set LIP_SEG_API_KEY in .env or as env var",
               file=sys.stderr)
         return 2
 
@@ -144,7 +142,7 @@ def main() -> int:
 
     args.output.mkdir(parents=True, exist_ok=True)
 
-    ok = sum(segment_image(p, args.url, args.api_key, args.output, args.timeout)
+    ok = sum(segment_image(p, args.url, DEFAULT_KEY, args.output, args.timeout)
              for p in images)
     print(f"\nDone. {ok}/{len(images)} succeeded.")
     return 0 if ok == len(images) else 1
