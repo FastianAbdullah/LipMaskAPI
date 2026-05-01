@@ -1,9 +1,3 @@
-"""
-Application configuration loaded from environment variables.
-
-All sensitive values (API keys, paths) come from .env — never commit those.
-Defaults are tuned for a single low-cost VPS (CPU only, ~2 GB RAM).
-"""
 from __future__ import annotations
 
 from functools import lru_cache
@@ -28,7 +22,6 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
 
     # ── Auth ──────────────────────────────────────────────────────────────
-    # Comma-separated list of valid API keys. Generate with: openssl rand -hex 32
     api_keys: str = Field(default="", description="Comma-separated valid API keys")
 
     # ── Model ─────────────────────────────────────────────────────────────
