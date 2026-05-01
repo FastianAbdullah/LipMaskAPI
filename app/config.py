@@ -31,8 +31,9 @@ class Settings(BaseSettings):
     torch_num_threads: int = 2
 
     # ── Inference limits ──────────────────────────────────────────────────
-    max_image_bytes: int = 50 * 1024 * 1024        # 50 MB
-    max_image_dim: int = 4096                       # px (longer side)
+    max_image_bytes: int = 50 * 1024 * 1024        # 10 MB upload cap
+    max_image_dim: int = 4096                       # px — reject anything bigger
+    process_image_dim: int = 1600                   # px — downscale to this before processing
     allowed_mime_types: List[str] = [
         "image/jpeg", "image/png", "image/webp", "image/bmp",
     ]
