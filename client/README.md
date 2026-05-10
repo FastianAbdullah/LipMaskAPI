@@ -2,11 +2,27 @@
 
 Send a photo to the lip segmentation API and get back masks, contours, and an overlay.
 
-## Install
+## First-time Setup
+
+1. **Install Python** — download and install it from [python.org/downloads](https://www.python.org/downloads/). During installation, check the box that says **"Add Python to PATH"**.
+2. **Open a terminal** — on Windows, press `Win + R`, type `cmd`, and hit Enter.
+3. **Navigate to this folder** — type `cd` followed by the path to this folder, e.g. `cd C:\Users\You\Downloads\client`.
+4. **Create a virtual environment** — run `python -m venv .venv`, then activate it with `.venv\Scripts\activate` (Windows) or `source .venv/bin/activate` (Mac/Linux).
+5. **Install dependencies** — run `pip install -r requirements.txt`.
+
+You only need to do steps 1–5 once. Next time, just open the terminal, navigate to the folder, activate the venv (step 4), and run the script.
+
+## Quick start
 
 ```bash
-pip install requests python-dotenv
+# Single image
+python client.py --image photo.jpg
+
+# Batch — entire folder
+python client.py --image-dir ./photos --output ./results
 ```
+
+Results are saved to `lip_seg_results/<image-name>/` by default.
 
 ## Setup
 
@@ -16,18 +32,6 @@ Edit `.env` in this directory with your credentials:
 LIP_SEG_API_KEY=your_api_key
 ```
 
-## Quick start
-
-```bash
-# Single image (credentials from .env)
-python client.py --image photo.jpg
-
-# Batch — entire folder
-python client.py --image-dir ./photos --output ./results
-```
-
-Results are saved to `lip_seg_results/<image-nam e>/` by default.
-
 ## Options
 
 | Flag | Default | Description |
@@ -35,7 +39,6 @@ Results are saved to `lip_seg_results/<image-nam e>/` by default.
 | `--image` | — | Path to a single image |
 | `--image-dir` | — | Path to a folder of images |
 | `--output` | `./lip_seg_results` | Where to save results |
-| `--timeout` | `60` | Per-request timeout in seconds |
 
 ## Output files
 
@@ -54,7 +57,7 @@ Each image gets its own subfolder inside `<output>/`:
 
 | Code | Cause | Fix |
 |---|---|---|
-| 401 | Wrong API key | Check `LIP_SEG_API_KEY` in `.env`|
+| 401 | Wrong API key | Check `LIP_SEG_API_KEY` in `.env` |
 | 422 | No face / lips detected | Use a clearer photo with visible lips |
 | 413 | Image too large | Keep under 10 MB and 4096 px |
 | 504 | Server timeout | Retry, or increase `--timeout` |
