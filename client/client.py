@@ -35,7 +35,7 @@ from PIL import Image as PILImage, ImageOps
 
 load_dotenv()
 
-DEFAULT_URL = "http://localhost:8000"
+DEFAULT_URL = "http://72.61.75.134"
 DEFAULT_KEY = os.environ.get("LIP_SEG_API_KEY")
 ALLOWED_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
 
