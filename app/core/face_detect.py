@@ -54,15 +54,20 @@ class LipROIDetector:
         pad_frac: float = 0.05,
     ) -> Optional[Tuple[np.ndarray, BBox]]:
         """
-        Returns (roi_crop, bbox) or complete image if no face was found.
-        bbox is (x1, y1, x2, y2) in original-image coordinates.
+        Returns (roi_crop, bbox) when a face is found, else None.
+
+        The previous implementation silently fell back to the full image as
+        the ROI when MediaPipe failed — that produced a hidden ~10× downscale
+        for pre-cropped lip images and "wings" at image edges from the model
+        running without skin context. Caller now handles the no-face case
+        explicitly (see pipeline.run_inference).
         """
         h, w = rgb_img.shape[:2]
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_img)
         result = self._detector.detect(mp_image)
 
         if not result.face_landmarks:
-            return rgb_img, (0, 0, w, h)
+            return None
 
         lm = result.face_landmarks[0]
         xs = [int(lm[i].x * w) for i in LIP_LANDMARK_IDX]

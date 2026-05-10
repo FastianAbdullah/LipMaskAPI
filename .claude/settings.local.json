@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import ast; ast.parse\\(open\\('app/core/pipeline.py'\\).read\\(\\)\\); ast.parse\\(open\\('app/core/postprocessing.py'\\).read\\(\\)\\); print\\('OK'\\)\")",
+      "PowerShell($env:PYTHONPATH=\"d:\\\\lip-seg-api\"; & \"d:\\\\lip-seg-api\\\\.venv\\\\Scripts\\\\python.exe\" tools/diagnose_pipeline.py --image client/results/ios2/input.png --out client/results/ios2/_diag 2>&1 | Select-Object -Last 80)",
+      "Bash(.venv/Scripts/python.exe -c \"import ast; ast.parse\\(open\\('app/core/pipeline.py'\\).read\\(\\)\\); ast.parse\\(open\\('app/core/face_detect.py'\\).read\\(\\)\\); print\\('OK'\\)\")",
+      "PowerShell($env:PYTHONPATH=\"d:\\\\lip-seg-api\"; & \"d:\\\\lip-seg-api\\\\.venv\\\\Scripts\\\\python.exe\" tools/run_pipeline.py --image client/results/ios2/input.png --out client/results/ios2/_after_fix 2>&1 | Select-Object -Last 25)"
+    ]
+  }
+}

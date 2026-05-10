@@ -23,6 +23,7 @@ from typing import Optional
 import cv2
 import numpy as np
 import torch
+import torch.nn.functional as F
 
 from .face_detect import LipROIDetector
 from .model import get_model
@@ -30,7 +31,6 @@ from .postprocessing import (
     clean_class_mask,
     exclude_teeth,
     extract_dp_contour,
-    upscale_pred_to_full,
 )
 from .preprocessing import INPUT_SIZE, build_5channel_input
 
@@ -67,13 +67,33 @@ def run_inference(rgb_image: np.ndarray, face_landmarker_path: Path) -> Segmenta
 
     t0 = time.perf_counter()
     h, w = rgb_image.shape[:2]
+    warnings: list[str] = []
+    face_detected = True
 
-    # 1. ROI detection
+    # 1. ROI detection — with explicit fallback for pre-cropped lip images.
     detector = LipROIDetector.get(face_landmarker_path)
     detection = detector.detect(rgb_image)
     if detection is None:
-        raise ValueError("No face detected in image")
-    roi, bbox = detection
+        # MediaPipe couldn't find a face — most commonly because the upload
+        # is already a tight lip crop. Running the model on the un-padded
+        # full image makes it predict "lip" pixels right at the image
+        # boundary (visible as "wings" at mouth corners after upsample).
+        # Pad with replicated border so the model has skin-like context
+        # surrounding the lip.
+        face_detected = False
+        # warnings.append("face_not_detected_used_lip_crop_fallback")
+        # logger.warning(
+        #     "No face detected; falling back to padded full-image inference"
+        #     " (image=%dx%d)", w, h,
+        # )
+        pad = max(20, int(0.15 * min(h, w)))
+        roi = cv2.copyMakeBorder(
+            rgb_image, pad, pad, pad, pad, borderType=cv2.BORDER_REPLICATE,
+        )
+        bbox = None
+    else:
+        roi, bbox = detection
+        pad = 0
 
     # 2. Preprocessing → 5-ch tensor
     tensor = build_5channel_input(roi, target_size=INPUT_SIZE)
@@ -83,12 +103,25 @@ def run_inference(rgb_image: np.ndarray, face_landmarker_path: Path) -> Segmenta
     model = get_model()
     device = next(model.parameters()).device
     inp = inp.to(device)
+    roi_h, roi_w = roi.shape[:2]
     with torch.no_grad():
         logits = model(inp)
-        pred_roi = torch.argmax(logits, dim=1).squeeze(0).cpu().numpy().astype(np.uint8)
+        # Bilinear-upsample logits to ROI resolution *before* argmax.
+        # Argmax-then-NEAREST resize produces pixel blocks at the upsample
+        # ratio; bilinear-then-argmax gives sub-pixel-smooth boundaries.
+        logits_roi = F.interpolate(
+            logits, size=(roi_h, roi_w), mode="bilinear", align_corners=False,
+        )
+        pred_roi = torch.argmax(logits_roi, dim=1).squeeze(0).cpu().numpy().astype(np.uint8)
 
-    # 4. Upscale to full image space
-    pred_full = upscale_pred_to_full(pred_roi, bbox, (h, w))
+    # 4. Place ROI-sized prediction into the full-image canvas
+    pred_full = np.zeros((h, w), dtype=np.uint8)
+    if bbox is None:
+        # Lip-crop fallback: ROI is the padded full image; crop padding off.
+        pred_full[:, :] = pred_roi[pad:pad + h, pad:pad + w]
+    else:
+        x1, y1, x2, y2 = bbox
+        pred_full[y1:y2, x1:x2] = pred_roi
 
     # 5. Post-process per class
     upper_raw = ((pred_full == 1) * 255).astype(np.uint8)
@@ -106,7 +139,6 @@ def run_inference(rgb_image: np.ndarray, face_landmarker_path: Path) -> Segmenta
     upper_dp = extract_dp_contour(upper)
     lower_dp = extract_dp_contour(lower)
 
-    warnings = []
     if upper_dp is None:
         warnings.append("upper_lip_contour_empty")
     if lower_dp is None:
@@ -121,7 +153,7 @@ def run_inference(rgb_image: np.ndarray, face_landmarker_path: Path) -> Segmenta
         lower_lip_contour=_contour_to_list(lower_dp),
         image_shape=(h, w),
         inference_ms=round(elapsed, 1),
-        face_detected=True,
+        face_detected=face_detected,
         warnings=warnings,
     )
 

@@ -35,18 +35,3 @@ def extract_dp_contour(mask: np.ndarray, epsilon_frac: float = 0.001) -> Optiona
     largest = max(contours, key=cv2.contourArea)
     epsilon = epsilon_frac * cv2.arcLength(largest, True)
     return cv2.approxPolyDP(largest, epsilon, True)
-
-
-def upscale_pred_to_full(
-    pred_roi: np.ndarray,
-    bbox: tuple[int, int, int, int],
-    full_shape: tuple[int, int],
-) -> np.ndarray:
-    """Place ROI-resolution prediction back into the original image canvas."""
-    h, w = full_shape
-    x1, y1, x2, y2 = bbox
-    canvas = np.zeros((h, w), dtype=np.uint8)
-    canvas[y1:y2, x1:x2] = cv2.resize(
-        pred_roi, (x2 - x1, y2 - y1), interpolation=cv2.INTER_NEAREST,
-    )
-    return canvas
